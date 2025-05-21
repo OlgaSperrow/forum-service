@@ -17,7 +17,7 @@ import java.security.Principal;
 public class UserAccountController  {
     private final UserAccountService userAccountService;
 
-    @PostMapping("/{baseUrl}/register")
+    @PostMapping("/register")
     public UserDto register(@RequestBody UserRegisterDto userRegisterDto) {
         return userAccountService.register(userRegisterDto);
     }

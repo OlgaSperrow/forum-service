@@ -13,6 +13,7 @@ import org.mindrot.jbcrypt.BCrypt;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -65,7 +66,8 @@ public class UserAccountServiceImpl implements UserAccountService {
     @Override
     public RolesDto changeRolesList(String login, String role, boolean isAddRole) {
         UserAccount userAccount= userAccountRepository.findById(login).orElseThrow(UserNotFoundException::new);
-        boolean isChanged = isAddRole ? userAccount.addRole(role) : userAccount.removeRole(role);
+        String roleUpperCase =role.toUpperCase();
+        boolean isChanged = isAddRole ? userAccount.addRole(roleUpperCase) : userAccount.removeRole(roleUpperCase);
         if(isChanged){
             userAccountRepository.save(userAccount);
         }
