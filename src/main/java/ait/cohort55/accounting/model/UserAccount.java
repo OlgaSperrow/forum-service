@@ -11,8 +11,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Getter
-@EqualsAndHashCode
-@Document
+@EqualsAndHashCode (of="login")
+@Document(collection = "users")
 public class UserAccount {
     @Id
     private String login;
