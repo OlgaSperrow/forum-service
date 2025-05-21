@@ -47,12 +47,17 @@ public class PostServiceImpl implements PostService {
     @Override
     public PostDto updatePost(String id, NewPostDTO newPostDTO) {
         Post post = postRepository.findById(id).orElseThrow(PostNotFoundException::new);
-        post.setTitle(newPostDTO.getTitle());
-        post.setContent(newPostDTO.getContent());
+        String content = newPostDTO.getContent();
+        if (content != null) {
+            post.setContent(content);
+        }
+        String title = newPostDTO.getTitle();
+        if (title != null) {
+            post.setTitle(title);
+        }
         Set<String> tags = newPostDTO.getTags();
-        if(!tags.isEmpty()) {
-            post.getTags().clear();
-            post.getTags().addAll(tags);
+        if (tags != null) {
+            tags.forEach(post::addTag);
         }
         post = postRepository.save(post);
         return modelMapper.map(post, PostDto.class);
@@ -69,41 +74,34 @@ public class PostServiceImpl implements PostService {
     public PostDto addComment(String id, String author, NewCommentDto newCommentDTO) {
         Post post = postRepository.findById(id).orElseThrow(PostNotFoundException::new);
         Comment comment = new Comment(author, newCommentDTO.getMessage());
-        comment.setMessage(newCommentDTO.getMessage());
-        comment.setUser(author);
         post.addComment(comment);
-        postRepository.save(post);
+        post = postRepository.save(post);
         return modelMapper.map(post, PostDto.class);
     }
 
     @Override
     public Iterable<PostDto> findPostsByAuthor(String author) {
-        List<Post> posts = postRepository.findAll().stream()
-                .filter(post -> post.getAuthor().equals(author))
-                .collect(Collectors.toList());
-
-        return posts.stream()
-                .map(post -> modelMapper.map(post, PostDto.class))
-                .collect(Collectors.toList());
+        return postRepository.findPostByAuthorIgnoreCase(author)
+                .map(post->modelMapper.map(post,PostDto.class))
+                .toList();
     }
 
     @Override
     public Iterable<PostDto> findPostsByTags(List<String> tags) {
-        List<Post> posts = postRepository.findAll().stream()
-                .filter(post -> post.getTags().stream().anyMatch(tags::contains))
-                .collect(Collectors.toList());
-        return posts.stream()
+        return postRepository.findPostsByTagsInIgnoreCase(tags)
                 .map(post -> modelMapper.map(post, PostDto.class))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
     public Iterable<PostDto> findPostsByPeriod(LocalDate dateFrom, LocalDate dateTo) {
-        List<Post> posts = postRepository.findAll().stream()
-                .filter(post -> post.getDateCreated().isAfter(dateFrom) && post.getDateCreated().isBefore(dateTo))
-                .collect(Collectors.toList())
-        return posts.stream()
+        return postRepository.findPostsByDateCreatedBetween(dateFrom, dateTo.plusDays(1))
                 .map(post -> modelMapper.map(post, PostDto.class))
-                .collect(Collectors.toList());;
+                .toList();
     }
+
+
 }
+
+
+

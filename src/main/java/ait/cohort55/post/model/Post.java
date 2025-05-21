@@ -36,7 +36,7 @@ public class Post {
     public void addLike() {
         likes++;
     }
-    public boolean addTeg(String tag) {
+    public boolean addTag(String tag) {
         return tags.add(tag);
     }
     public void addComment(Comment comment) {
